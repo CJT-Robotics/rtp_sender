@@ -1,36 +1,48 @@
 <launch>
-    <arg name="receiver_ip" default="192.168.1.7" />
+      <arg name="receiver_ip" default="127.0.0.1" />
 
-    <arg name="b_v_good"       value="750k" />
-    <arg name="maxrate_good"   value="1M" />
-    <arg name="bufsize_good"   value="500k" />
+      <arg name="b_v_good"       value="750k" />
+      <arg name="maxrate_good"   value="1M" />
+      <arg name="bufsize_good"   value="500k" />
 
-    <arg name="b_v_poor"       value="350k" />
-    <arg name="maxrate_poor"   value="500k" />
-    <arg name="bufsize_poor"   value="250k" />
-
-
-    <arg name="cam1_dev"    default="/dev/video0" />
-    <arg name="cam1_port"   default="5000" />
-    <arg name="cam1_fps"    default="20" />
-    <arg name="cam1_preset" default="good" /> <node name="stream_front" pkg="nodelet" type="nodelet" args="standalone" output="screen"
-          launch-prefix="ffmpeg -f v4l2 -input_format mjpeg -video_size 640x480 -framerate $(arg cam1_fps) -i $(arg cam1_dev) 
-                         -c:v libx264 -preset ultrafast -tune zerolatency -g $(arg cam1_fps) 
-                         -b:v $(eval arg('b_v_' + arg('cam1_preset'))) 
-                         -maxrate $(eval arg('maxrate_' + arg('cam1_preset'))) 
-                         -bufsize $(eval arg('bufsize_' + arg('cam1_preset'))) 
-                         -f rtp rtp://$(arg receiver_ip):$(arg cam1_port) __name:=ignore_cam1" />
+      <arg name="b_v_poor"       value="350k" />
+      <arg name="maxrate_poor"   value="500k" />
+      <arg name="bufsize_poor"   value="250k" />
 
 
-    <arg name="cam2_dev"    default="/dev/video1" />
-    <arg name="cam2_port"   default="5002" />
-    <arg name="cam2_fps"    default="20" />
-    <arg name="cam2_preset" default="good" /> <node name="stream_rear" pkg="nodelet" type="nodelet" args="standalone" output="screen"
-          launch-prefix="ffmpeg -f v4l2 -input_format mjpeg -video_size 640x480 -framerate $(arg cam2_fps) -i $(arg cam2_dev) 
-                         -c:v libx264 -preset ultrafast -tune zerolatency -g $(arg cam2_fps) 
-                         -b:v $(eval arg('b_v_' + arg('cam2_preset'))) 
-                         -maxrate $(eval arg('maxrate_' + arg('cam2_preset'))) 
-                         -bufsize $(eval arg('bufsize_' + arg('cam2_preset'))) 
-                         -f rtp rtp://$(arg receiver_ip):$(arg cam2_port) __name:=ignore_cam2" />
+      <arg name="cam1_dev"    default="/dev/video0" />
+      <arg name="cam1_port"   default="5000" />
+      <arg name="cam1_fps"    default="20" />
+      <arg name="cam1_preset" default="good" />
+
+      <arg name="cam1_b_v"     value="$(eval arg('b_v_' + arg('cam1_preset')))" />
+      <arg name="cam1_maxrate" value="$(eval arg('maxrate_' + arg('cam1_preset')))" />
+      <arg name="cam1_bufsize" value="$(eval arg('bufsize_' + arg('cam1_preset')))" />
+
+      <node name="stream_front" pkg="nodelet" type="nodelet" args="standalone" output="screen"
+            launch-prefix="bash -c 'ffmpeg -f v4l2 -input_format mjpeg -video_size 640x480 -framerate $(arg cam1_fps) -i $(arg cam1_dev) 
+                              -c:v libx264 -preset ultrafast -tune zerolatency -g $(arg cam1_fps) 
+                              -b:v $(arg cam1_b_v) 
+                              -maxrate $(arg cam1_maxrate) 
+                              -bufsize $(arg cam1_bufsize) 
+                              -f rtp rtp://$(arg receiver_ip):$(arg cam1_port)' --" />
+
+
+      <arg name="cam2_dev"    default="/dev/video1" />
+      <arg name="cam2_port"   default="5002" />
+      <arg name="cam2_fps"    default="20" />
+      <arg name="cam2_preset" default="good" />
+
+      <arg name="cam2_b_v"     value="$(eval arg('b_v_' + arg('cam2_preset')))" />
+      <arg name="cam2_maxrate" value="$(eval arg('maxrate_' + arg('cam2_preset')))" />
+      <arg name="cam2_bufsize" value="$(eval arg('bufsize_' + arg('cam2_preset')))" />
+
+      <!-- <node name="stream_front" pkg="nodelet" type="nodelet" args="standalone" output="screen"
+            launch-prefix="ffmpeg -f v4l2 -input_format mjpeg -video_size 640x480 -framerate $(arg cam2_fps) -i $(arg cam2_dev) 
+                              -c:v libx264 -preset ultrafast -tune zerolatency -g $(arg cam2_fps) 
+                              -b:v $(arg cam2_b_v) 
+                              -maxrate $(arg cam2_maxrate) 
+                              -bufsize $(arg cam2_bufsize) 
+                              -f rtp rtp://$(arg receiver_ip):$(arg cam2_port) __name:=ignore_cam2" /> -->
 
 </launch>

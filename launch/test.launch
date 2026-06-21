@@ -1,48 +1,62 @@
 <launch>
-      <arg name="receiver_ip" default="192.168.0.179" />
+      <arg name="receiver_ip"   default="192.168.0.179" />
+      <arg name="ffmpeg_preset" default="ultrafast" />
+      <arg name="ffmpeg_tune"   default="zerolatency" />
 
-      <arg name="b_v_good"       value="2.5M" />
-      <arg name="maxrate_good"   value="2.5M" />
-      <arg name="bufsize_good"   value="2.5M" />
+      <arg name="cam_f_dev"        default="/dev/video0" />
+      <arg name="cam_f_port"       default="5000" />
+      <arg name="cam_f_fps"        default="30" />
+      <arg name="cam_f_width"      default="3840" />
+      <arg name="cam_f_height"     default="2160" />
+      <arg name="stream_f_width"   default="1280" />
+      <arg name="stream_f_height"  default="720" />
+      <arg name="stream_f_bitrate" default="2.5M" />
+      <arg name="stream_f_bufsize" default="2.5M" />
 
-      <arg name="b_v_poor"       value="1M" />
-      <arg name="maxrate_poor"   value="1M" />
-      <arg name="bufsize_poor"   value="1M" />
+      <arg name="cam_b_dev"        default="/dev/video2" />
+      <arg name="cam_b_port"       default="5002" />
+      <arg name="cam_b_fps"        default="20" />
+      <arg name="cam_b_width"      default="640" />
+      <arg name="cam_b_height"     default="480" />
+      <arg name="stream_b_bitrate" default="1M" />
+      <arg name="stream_b_bufsize" default="1M" />
 
+      <node name="cam_front" pkg="usb_cam" type="usb_cam_node" output="screen">
+            <param name="video_device"    value="$(arg cam_f_dev)" />
+            <param name="image_width"     value="$(arg cam_f_width)" />
+            <param name="image_height"    value="$(arg cam_f_height)" />
+            <param name="pixel_format"    value="mjpeg" />
+            <param name="framerate"       value="$(arg cam_f_fps)" />
+            <param name="camera_frame_id" value="camera_front" />
+      </node>
 
-      <arg name="cam1_dev"    default="/dev/video0" />
-      <arg name="cam1_port"   default="5000" />
-      <arg name="cam1_fps"    default="30" />
-      <arg name="cam1_preset" default="good" />
+      <node name="cam_back" pkg="usb_cam" type="usb_cam_node" output="screen">
+            <param name="video_device"    value="$(arg cam_b_dev)" />
+            <param name="image_width"     value="$(arg cam_b_width)" />
+            <param name="image_height"    value="$(arg cam_b_height)" />
+            <param name="pixel_format"    value="mjpeg" />
+            <param name="framerate"       value="$(arg cam_b_fps)" />
+            <param name="camera_frame_id" value="camera_back" />
+      </node>
 
-      <arg name="cam1_b_v"     value="$(eval arg('b_v_' + arg('cam1_preset')))" />
-      <arg name="cam1_maxrate" value="$(eval arg('maxrate_' + arg('cam1_preset')))" />
-      <arg name="cam1_bufsize" value="$(eval arg('bufsize_' + arg('cam1_preset')))" />
+      <node name="stream_front" pkg="rtp_sender" type="ros_to_ffmpeg.py" output="screen">
+            <param name="image_topic"   value="cam_front/image_raw" />
+            <param name="receiver_ip"   value="$(arg receiver_ip)" />
+            <param name="port"          value="$(arg cam_f_port)" />
+            <param name="fps"           value="$(arg cam_f_fps)" />
+            <param name="stream_width"  value="$(arg stream_f_width)" />
+            <param name="stream_height" value="$(arg stream_f_height)" />
+            <param name="bitrate"       value="$(arg stream_f_bitrate)" />
+      </node>
 
-      <node name="stream_front" pkg="nodelet" type="nodelet" args="standalone" output="screen"
-            launch-prefix="bash -c 'ffmpeg -f v4l2 -input_format mjpeg -video_size 2560x1440  -framerate $(arg cam1_fps) -i $(arg cam1_dev) 
-                              -c:v libx264 -preset ultrafast -tune zerolatency -g $(arg cam1_fps) 
-                              -b:v $(arg cam1_b_v) 
-                              -maxrate $(arg cam1_maxrate) 
-                              -bufsize $(arg cam1_bufsize) 
-                              -f rtp rtp://$(arg receiver_ip):$(arg cam1_port)' --" />
-
-
-      <arg name="cam2_dev"    default="/dev/video2" />
-      <arg name="cam2_port"   default="5002" />
-      <arg name="cam2_fps"    default="20" />
-      <arg name="cam2_preset" default="poor" />
-
-      <arg name="cam2_b_v"     value="$(eval arg('b_v_' + arg('cam2_preset')))" />
-      <arg name="cam2_maxrate" value="$(eval arg('maxrate_' + arg('cam2_preset')))" />
-      <arg name="cam2_bufsize" value="$(eval arg('bufsize_' + arg('cam2_preset')))" />
-
-      <node name="stream_back" pkg="nodelet" type="nodelet" args="standalone" output="screen"
-            launch-prefix="bash -c 'ffmpeg -f v4l2 -input_format mjpeg -video_size 640x480 -framerate $(arg cam2_fps) -i $(arg cam2_dev) 
-                              -c:v libx264 -preset ultrafast -tune zerolatency -g $(arg cam2_fps) 
-                              -b:v $(arg cam2_b_v) 
-                              -maxrate $(arg cam2_maxrate) 
-                              -bufsize $(arg cam2_bufsize) 
-                              -f rtp rtp://$(arg receiver_ip):$(arg cam2_port)' --" />
+      <node name="stream_back" pkg="rtp_sender" type="ros_to_ffmpeg.py" output="screen">
+            <param name="image_topic"   value="cam_back/image_raw" />
+            <param name="receiver_ip"   value="$(arg receiver_ip)" />
+            <param name="port"          value="$(arg cam_b_port)" />
+            <param name="fps"           value="$(arg cam_b_fps)" />
+            <param name="stream_width"  value="$(arg cam_b_width)" />
+            <param name="stream_height" value="$(arg cam_b_height)" />
+            <param name="bitrate"       value="$(arg stream_b_bitrate)" />
+      </node>
 
 </launch>

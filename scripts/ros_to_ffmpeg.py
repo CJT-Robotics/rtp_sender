@@ -10,7 +10,7 @@ class RosToFFmpeg:
         rospy.init_node('ros_to_ffmpeg', anonymous=True)
         
         self.image_topic = rospy.get_param('~image_topic', 'cam_front/image_raw')
-        self.receiver_ip = rospy.get_param('~receiver_ip', '192.168.0.179')
+        self.receiver_ip = rospy.get_param('~receiver_ip', '192.168.0.5')
         self.port = rospy.get_param('~port', 5000)
         self.fps = rospy.get_param('~fps', 30)
         

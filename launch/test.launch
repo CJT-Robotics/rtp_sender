@@ -1,9 +1,9 @@
 <launch>
-      <arg name="receiver_ip"   default="192.168.0.179" />
+      <arg name="receiver_ip"   default="192.168.0.5" />
       <arg name="ffmpeg_preset" default="ultrafast" />
       <arg name="ffmpeg_tune"   default="zerolatency" />
 
-      <arg name="cam_f_dev"        default="/dev/video0" />
+      <arg name="cam_f_dev"        default="/dev/video2" />
       <arg name="cam_f_port"       default="5000" />
       <arg name="cam_f_fps"        default="30" />
       <arg name="cam_f_width"      default="3840" />
@@ -13,7 +13,7 @@
       <arg name="stream_f_bitrate" default="2.5M" />
       <arg name="stream_f_bufsize" default="2.5M" />
 
-      <arg name="cam_b_dev"        default="/dev/video2" />
+      <arg name="cam_b_dev"        default="/dev/video0" />
       <arg name="cam_b_port"       default="5002" />
       <arg name="cam_b_fps"        default="20" />
       <arg name="cam_b_width"      default="640" />
